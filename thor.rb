@@ -54,7 +54,7 @@ class Coffee < Thor
   end
 
   def target
-    root.join(SOURCE)
+    root.join(TARGET)
   end
 
   def process_loose_file(file)
@@ -71,7 +71,7 @@ class Coffee < Thor
     _compile(
       command: "coffee -o tmp --join --compile src/#{dir}/**/*.coffee",
       source:  "tmp/concatenation.js",
-      target:  dir.to_s + '.js',
+      target:  target.join(dir.to_s + '.js'),
       message: "\e[032mcompiled\e[0;90m '\e[0m%{target}\e[0;90m'\e[0m"
     )
   end
@@ -85,7 +85,8 @@ class Coffee < Thor
     end
     stderr = stderr.read
     if stderr == ""
-      system "mv #{args[:source]} #{args[:target]}"
+      mv = [ "mv", args[:source], args[:target] ].map(&:to_s)
+      system *mv
       msg = args[:message] % args
       puts "\e[0;90m#{Time.now} #{msg}"
       notify false, "Success: #{File.basename(args[:target])}", msg.gsub(/\e\[[^m]+m/,'')
